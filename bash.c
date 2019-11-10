@@ -41,7 +41,6 @@ int main(void) {
             return 0;
         }
 
-        // fork child and execute program
         signal(SIGINT, SIG_DFL);
         int pid;
         pid = fork();
@@ -53,8 +52,6 @@ int main(void) {
             exit(0);
         }
         signal(SIGINT, SIG_IGN);
-
-        // wait for program to finish and print exit status
         wait(NULL);
     }
 }
