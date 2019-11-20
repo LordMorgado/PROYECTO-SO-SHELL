@@ -22,6 +22,37 @@ void *tuberia (*void id){ //El hilo lee el comando ingresado despues del |
         execvp(args[0], args);//Ejecutamos la linea
         exit(0);
     }
+    pthread_exit(id);
+}
+
+void *lectura (*void id){ //Lee lo que sigue y la tuberia entonces lo escribe
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    char *ptrEntrada = input;
+    int tube_pid = fork();
+    if (tube_pid == -1) {
+        perror("\nError en fork\n");
+        exit(-1);
+    } else if(tube_pid == 0) {
+        execvp(args[0], args);//Ejecutamos la linea
+        exit(0);
+    }
+    pthread_exit(id);
+}
+
+void *direccionar (*void id){ //Escribe directo para una tuberia
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    char *ptrEntrada = input;
+    int tube_pid = fork();
+    if (tube_pid == -1) {
+        perror("\nError en fork\n");
+        exit(-1);
+    } else if(tube_pid == 0) {
+        execvp(args[0], args);//Ejecutamos la linea
+        exit(0);
+    }
+    pthread_exit(id);
 }
 
 int main(void) {
@@ -61,10 +92,27 @@ int main(void) {
                 }
                 hilito++;
             }
+            if (*ptrEntrada == '<'){
+                tubo=1;
+                error=pthread_create(&hilos[hilito],i,lectura,&id[hilito]); //Se manda con i
+                if(error){
+                    printf("Error al crear el hilo\n\n");
+                }
+                hilito++;
+            }
+            if (*ptrEntrada == '>'){
+                tubo=1;
+                error=pthread_create(&hilos[hilito],i,direccionar,&id[hilito]); //Se manda con i
+                if(error){
+                    printf("Error al crear el hilo\n\n");
+                }
+                hilito++;
+            }
             if (*ptrEntrada == '\n') break; //Acaba la linea
             for (args[i++] = ptrEntrada; *ptrEntrada && *ptrEntrada != ' ' && *ptrEntrada != '\n'; ptrEntrada++);
             *ptrEntrada = '\0';
         }
+        
         /*
         leera el mensaje del hilo desde un documento en caso de que exista
         if(tubo){
@@ -87,6 +135,10 @@ int main(void) {
         }
         
         }*/
+        
+        for(h=0;h<hilito;h++){
+            pthread_join(hilos[h],(void**)&valor);
+        }
 
         // si pone 'exit', terminar ejecucuión del programa
         if (strcmp(EXITWORD, args[0]) == 0) {
