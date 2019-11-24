@@ -1,9 +1,4 @@
-.idea
+.idea/*
 node_modules
 .vscode
-backend/node_modules/*
-backend/uploadedFiles/*
-backend/logs/*
-backend/sensitive.env
-!backend/uploadedFiles/.gitkeep
 */data
